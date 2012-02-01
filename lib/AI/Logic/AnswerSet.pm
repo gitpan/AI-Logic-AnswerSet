@@ -18,7 +18,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub executeFromFileAndSave {		#Executes DLV with a file as input and saves the output in another file
 
@@ -530,10 +530,20 @@ AI::Logic::AnswerSet - Perl extension for embedding ASP (Answer Set Programming)
 
 =head1 DESCRIPTION
 
-This extension allows to interact with DLV, which is a system for Answer Set Programming (ASP).
-The DLV system is needed inside the directory in which the perl program is running. 
-DLV can be gotten at www.dlvsystem.com .
+This extension allows to interact with DLV, an Artificial Intelligence system
+for Answer Set Programming (ASP).
+Please note that the DLV system must appear in the same folder of the perl program
+and it must be renamed as "dlv";
+DLV can be freely obtained at www.dlvsystem.com.
+For further info about DLV and Answer Set Programming please start from www.dlvsystem.com.
 
+The module was originally published as "ASPerl", but suffered from
+some problems with the namespace, now changed. The module has been
+also significantly rearranged according to the advices coming from the
+community. Thank you all!
+If you are using this module, please let us know: we are always
+interested in end-users desires, and we wish to improve our library:
+comments are truly welcome!
 
 =head2 Methods
 
@@ -541,191 +551,197 @@ DLV can be gotten at www.dlvsystem.com .
 
 This method allows to execute DLV with and input file and save the output in another file.
 
-AI::Logic::AnswerSet::executeFromFileAndSave("outprog.txt","dlvprog.txt","");
+	AI::Logic::AnswerSet::executeFromFileAndSave("outprog.txt","dlvprog.txt","");
 
-In this case the file "outprog.txt" consists of the result of the DLV invocation with the file "dlvprog.txt".
-No code is specified in the third value of the method. It can be used to add code to an existing file or to a new one.
+In this case the file "outprog.txt" consists of the result of the DLV invocation 
+with the file "dlvprog.txt".
+No code is specified in the third value of the method. It can be used to add code 
+to an existing file or to a new one.
 
-AI::Logic::AnswerSet::executeFromFileAndSave("outprog.txt","dlvprog.txt","b(X):-a(X). a(1).");
+	AI::Logic::AnswerSet::executeFromFileAndSave("outprog.txt","dlvprog.txt",
+	"b(X):-a(X). a(1).");
   
 =head3 executeAndSave
 
-To call DLV without an input file, directly writing code using the DLV terminal, can be done with this method,
-passing only the name of the output file.
+To call DLV without an input file, directly writing the ASP code from the terminal, 
+use this method, passing only the name of the output file.
 
-AI::Logic::AnswerSet::executeAndSave("outprog.txt");
+	AI::Logic::AnswerSet::executeAndSave("outprog.txt");
 
-Press Ctrl+d to stop using the DLV terminal and execute the program.
+Press Ctrl+D to stop using the DLV terminal and execute the program.
 
 =head3 singleExec
 
-Using this method is possible to execute DLV with many input files, including also the DLV options like "-nofacts".
+Use this method to execute DLV whit several input files, including also
+DLV options like "-nofacts".
 The output will be stored inside an array.
 
-my @out = AI::Logic::AnswerSet::singleExec("3col.txt","nodes.txt","edges.txt","-nofacts");
+	my @out = AI::Logic::AnswerSet::singleExec("3col.txt","nodes.txt","edges.txt","-nofacts");
 
-This method can be used also like this:
+Another way to use this method:
 
-my @out = AI::Logic::AnswerSet::singleExec();
+	my @out = AI::Logic::AnswerSet::singleExec();
 
-In this way it will work like "executeAndSave" without saving the output in a file.
+In this way it will work like C<executeAndSave()> without saving the output to a file.
 
 =head3 iterativeExec
 
 This method allows to call multiples DLV executions for several instances of the same problem.
-Suppose you have a program that calculates the 3-colorability of a graph; in this case exists the possibility
-to have more than a graph, and each graph's instance can be stored in a different file. A Perl programmer
-might want to work with the results of all the graphs he has in his files, so this function will be useful for this purpose.
-The way to use it is the following:
+Suppose you have a program that calculates the 3-colorability of a graph; in this case
+one might have more than a graph, and each graph instance can be stored in a different file.
+A Perl programmer might want to work with the results of all the graphs she has in her files,
+so this function will be useful for this purpose.
+Use it like in the following:
 
-my @outputs = AI::Logic::AnswerSet::iterativeExec("3col.txt","nodes.txt","./instances");
+	my @outputs = AI::Logic::AnswerSet::iterativeExec("3col.txt","nodes.txt","./instances");
 
 In this case the nodes of each graph are the same, but not the edges.
-Notice that to use this method correctly, the user must specify the directory's path in which the instances of the program
-(the edges in this case) are saved.
+Notice that in order to correctly use this method, the user must specify the path 
+to the instances (the edges, in this case).
 
-The output of the call to this function is a two-dimensional array where each element of the array correspond to the result of each
-DLV execution, so is exactly like the result of the function "singleExec".
+The output of this function is a two-dimensional array; each element corresponds to the result
+of a single DLV execution, exactly as in the case of the function C<singleExec()>.
 
 =head3 selectOutput
 
-This method provides to get one of the result of the "iterativeExec" one.
+This method allows to get one of the results of C<iterativeExec>.
 
-my @outputs = AI::Logic::AnswerSet::iterativeExec("3col.txt","nodes.txt","./instances");
-my @out = AI::Logic::AnswerSet::selectOutput(\@outputs,0);
+	my @outputs = AI::Logic::AnswerSet::iterativeExec("3col.txt","nodes.txt","./instances");
+	my @out = AI::Logic::AnswerSet::selectOutput(\@outputs,0);
 
-In this case the selected output is the first one.
+In this case the first output is selected.
 
 =head3 getASFromFile
 
-Parses the output of a DLV execution saved in a file in order to split the answer sets.
+Parses the output of a DLV execution saved in a file and gather the answer sets.
 
-AI::Logic::AnswerSet::executeFromFileAndSave("outprog.txt","dlvprog.txt","");
-my @result = AI::Logic::AnswerSet::getASFromFile("outprog.txt");
+	AI::Logic::AnswerSet::executeFromFileAndSave("outprog.txt","dlvprog.txt","");
+	my @result = AI::Logic::AnswerSet::getASFromFile("outprog.txt");
 
 =head3 getAS
 
-Parses the output of a DLV execution in order to split the answer sets.
+Parses the output of a DLV execution and gather the answer sets.
 
-my @out = AI::Logic::AnswerSet::singleExec("3col.txt","nodes.txt","edges.txt","-nofacts");
-my @result = AI::Logic::AnswerSet::getAS(@out);
+	my @out = AI::Logic::AnswerSet::singleExec("3col.txt","nodes.txt","edges.txt","-nofacts");
+	my @result = AI::Logic::AnswerSet::getAS(@out);
 
 =head3 mapAS
 
-Parses the new output in order to save and organize the results inside a hashmap(array of hashes).
-This module allows to interact with DLV, which is a system for Answer Set Programming (ASP).
-The DLV system is needed inside the directory in which the perl program is running. 
-DLV can be gotten at www.dlvsystem.com .
+Parses the new output in order to save and organize the results into a hashmap.
 
-About two months ago I published "ASPerl", that was the first name of this module, but the name and other things were bad.
-Now I adopted this namespace hoping it is good (also thanks to a previous advice).
+	my @out = AI::Logic::AnswerSet::singleExec("3col.txt","nodes.txt","edges.txt","-nofacts");
+	my @result = AI::Logic::AnswerSet::getAS(@out);
+	my @mappedAS = AI::Logic::AnswerSet::mapAS(@result);
 
-I would like to know what you think about it
+The user can set some constraints on the data to be saved in the hashmap, such as predicates, or answer sets, or both.
 
+	my @mappedAS = AI::Logic::AnswerSet::mapAS(@result,@predicates,@answerSets);
 
-my @out = AI::Logic::AnswerSet::singleExec("3col.txt","nodes.txt","edges.txt","-nofacts");
-my @result = AI::Logic::AnswerSet::getAS(@out);
-my @mappedAS = AI::Logic::AnswerSet::mapAS(@result);
+For instance, think about the 3-colorability problem: imagine to 
+have the edges in the hashmap, and to print the edges contained in the third answer set
+returned by DLV; this is an example of the print instruction, useful to understand how
+the hashmap works:
 
-The user can decide some constraints about the data to save in the hashmap, such as predicates or answer sets or both.
+	print "Edges: @{$mappedAS[2]{edge}}\n";
 
-my @mappedAS = AI::Logic::AnswerSet::mapAS(@result,@predicates,@answerSets);
-
-Again about the 3-colorability problem, imagine to save in the hashmap the edges of the graph.
-Now imagine to print the edges of the third answer set returned by DLV; this is an example of the print instruction
-that can be useful to understand how the hashmap works:
-
-print "Edges: @{$mappedAS[2]{edge}}\n";
-
-So we are printing the array containing the predicate "edge".
+In this case, we are printing the array containing the predicate "edge".
 
 =head3 getPred
 
-Easily manage the hashmap and get the desired predicate(see the print example described in the method before);
+Easily manage the hashmap and get the desired predicate(see the print example
+described in the method above):
 
-my @edges = AI::Logic::AnswerSet::getPred(\@mappedAS,3,"edge");
+	my @edges = AI::Logic::AnswerSet::getPred(\@mappedAS,3,"edge");
 
 =head3 getProjection
 
-Returns the projection of the nth term of a specified predicate. Suppose to have the predicate "person" C<person(Name,Surename);> and
-want only the surename of all the instances of "person":
+Returns the projection of the n-th term of a specified predicate.
+Suppose that we have the predicate "person" C<person(Name,Surename);> and
+that we just want the surenames of all the instances of "person":
 
-my @surenames = AI::Logic::AnswerSet::getProjection(\@mappedAS,3,"person",2);
+	my @surenames = AI::Logic::AnswerSet::getProjection(\@mappedAS,3,"person",2);
 
-In order, the elements passed to the method are: hashmap, number of the answer set, name of the predicate, position of the term.
+The parameters are, respectively: hashmap, number of the answer set, name of the predicate,
+position of the term.
 
 =head3 statistics
 
-This method returns an array of hashes in which the statistics of every predicate of every answer sets are stored.
-These statistics are the number of occurrences of the specified predicates of each answer set.
-If a condition of comparison is specified(number of predicates) it returns the answer sets that satisfy that condition.
+This method returns an array of hashes with some stats of every predicate of every answer set,
+namely the number of occurrences of the specified predicates of each answer set.
+If a condition is specified(number of predicates), only the answer sets that satisfy
+the condition are returned.
 
-my @res = AI::Logic::AnswerSet::getAS(@output);
-my @predicates = ("node","edge");
-my @stats = AI::Logic::AnswerSet::statistics(\@res,\@predicates);
+	my @res = AI::Logic::AnswerSet::getAS(@output);
+	my @predicates = ("node","edge");
+	my @stats = AI::Logic::AnswerSet::statistics(\@res,\@predicates);
 
-In this case the data structure returned is the same as the one returned by C<mapAS>.
-So, for each answer set(each element of the array of hashes), the hashmap will be something like this:
+In this case the data structure returned is the same as the one returned by C<mapAS()>.
+Hence, for each answer set (each element of the array of hashes), the hashmap will appear 
+like this:
 
-{
-	node => 6
-	edge => 9
-}
+	{
+		node => 6
+		edge => 9
+	}
 
 This means that for a particular answer set we have 6 nodes and 9 edges.
-On the other hand, this method can be used with some constraints:
+In addition, this method can be used with some constraints:
 
-my @res = AI::Logic::AnswerSet::getAS(@output);
-my @predicates = ("node,"edge");
-my @numbers = (4,15);
-my @operators = (">","<");
-my @stats = AI::Logic::AnswerSet::statistics(\@res,\@predicates,\@numbers,\@operators);
+	my @res = AI::Logic::AnswerSet::getAS(@output);
+	my @predicates = ("node,"edge");
+	my @numbers = (4,15);
+	my @operators = (">","<");
+	my @stats = AI::Logic::AnswerSet::statistics(\@res,\@predicates,\@numbers,\@operators);
 
-Now the functions returns the answer sets that satisfy the condition: the number of occurrences of the predicate "node" must be higher than 4, and the number of occurrences of the predicate "edge" must be less than 15.
+Now the functions returns the answer sets that satisfy the condition, i.e., an answer set
+is returned only if the number of occurrences of the predicate "node" is higher than 4, and the number of occurrences of the predicate "edge" less than 15.
 
 =head3 getFacts
 
-Get the logic program's facts from a file or a string.
+Get the logic program facts from a file or a string.
 
-my @facts = AI::Logic::AnswerSet::getFacts($inputFile);
+	my @facts = AI::Logic::AnswerSet::getFacts($inputFile);
 
 or
 
-my $code = "a(X):-b(X). b(1). b(2).";
-my @facts = AI::Logic::AnswerSet::getFacts($code);
+	my $code = "a(X):-b(X). b(1). b(2).";
+	my @facts = AI::Logic::AnswerSet::getFacts($code);
 
-There is only a constraint according to the code; use a space between rules or facts.
-Example of wrong input code:
+DLV code can be freely exploited, with the only constraint of putting a space between rules
+or facts.
+This is an example of wrong input code:
 
-my $code = "a(X):-b(X).b(1).b(2).";
+	my $code = "a(X):-b(X).b(1).b(2).";
 
 =head3 addCode
 
 Use this method to quiclky add new code to a string or a file.
 
-my $code = "a(X):-b(X). b(1). b(2).";
-AI::Logic::AnswerSet::addCode($code,"b(3). b(4).");
+	my $code = "a(X):-b(X). b(1). b(2).";
+	AI::Logic::AnswerSet::addCode($code,"b(3). b(4).");
 
 or
 
-my $file = "myfile.txt";
-AI::Logic::AnswerSet::addCode($file,"b(3). b(4).");
+	my $file = "myfile.txt";
+	AI::Logic::AnswerSet::addCode($file,"b(3). b(4).");
 
 =head3 createNewFile
 
 Creates a new file with some code.
 
-AI::Logic::AnswerSet::createNewFile($file,"b(3). b(4).");
+	AI::Logic::AnswerSet::createNewFile($file,"b(3). b(4).");
 
 =head3 addFacts
 
-Adds facts quickly inside a file. Imagine to have some data(representing facts) acquired before in your program and
-stored inside an array; just use this method to put them in a file and give them a name.
+Quiclky adds facts to a file. Imagine to have some data(representing facts) 
+stored inside an array; just use this method to put them in a file and give it a name.
 
-AI::Logic::AnswerSet::addFacts("villagers",\@villagers,">","villagersFile.txt");
+	AI::Logic::AnswerSet::addFacts("villagers",\@villagers,">","villagersFile.txt");
 
-"villagers" will be the name of the facts(e.g. C<villagers(smith).>), C<@villagers> is the array with the facts,
-">" is the file operator(so this is a new file) and "villagersFile.txt" is the file's name.
+In the example above, "villagers" will be the name of the facts; C<@villagers> is the array 
+containing the data; ">" is the file operator(will create a new file, in this case); 
+"villagersFile.txt" is the filename. The file will contain facts of the form "villagers(X)",
+for each "X", appearing in the array C<@villagers>.
 
 
 =head1 SEE ALSO
